@@ -49,7 +49,7 @@ func TestTypeString(t *testing.T) {
 
 func TestKeywords(t *testing.T) {
 	var tokens = []struct {
-		tt  Type
+		tt      Type
 		keyword bool
 	}{
 		{ILLEGAL, false},
@@ -86,6 +86,49 @@ func TestKeywords(t *testing.T) {
 	for _, token := range tokens {
 		if token.tt.IsKeyword() != token.keyword {
 			t.Errorf("want: %v got: %v for %s\n", token.keyword, token.tt.IsKeyword(), token.tt.String())
+		}
+	}
+}
+
+func TestLiterals(t *testing.T) {
+	var tokens = []struct {
+		tt      Type
+		literal bool
+	}{
+		{ILLEGAL, false},
+		{EOF, false},
+		{COMMENT, false},
+		{SEMICOLON, false},
+
+		{IDENTIFIER, true},
+		{NUMBER, true},
+		{FLOAT, true},
+
+		{LPAREN, false},
+		{RPAREN, false},
+		{ASSIGN, false},
+		{MULT, false},
+		{AND, false},
+		{EQUAL, false},
+
+		{IDENTIFIERS, false},
+		{EVENTS, false},
+		{PARTIAL, false},
+		{REACHABILITY, false},
+		{NETWORK, false},
+		{CONTINUOUS, false},
+		{LOC, false},
+		{SYN, false},
+		{AUT, false},
+		{STT, false},
+		{ST, false},
+		{TO, false},
+		{RESULTS, false},
+	}
+
+	for _, token := range tokens {
+		if token.tt.IsLiteral() != token.literal {
+			t.Errorf("want: %v got: %v for %s\n", token.literal, token.tt.IsLiteral(), token.tt.String())
 		}
 	}
 }

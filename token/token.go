@@ -22,9 +22,11 @@ const (
 	COMMENT
 	SEMICOLON
 
+	literal_beg
 	IDENTIFIER // literals
 	NUMBER     // 12345
 	FLOAT      // 123.45
+	literal_end
 
 	LPAREN // (
 	RPAREN // )
@@ -84,6 +86,10 @@ var tokens = [...]string{
 	TO:           "TO",
 	RESULTS:      "RESULTS",
 }
+
+// IsLiteral returns true for tokens corresponding to basic type literals; it
+// returns false otherwise.
+func (t Type) IsLiteral() bool { return literal_beg < t && t < literal_end }
 
 // IsKeyword returns true for tokens corresponding to keywords; it returns
 // false otherwise.
