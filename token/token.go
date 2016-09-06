@@ -36,6 +36,7 @@ const (
 	AND   // &&
 	EQUAL // ==
 
+	keyword_beg
 	IDENTIFIERS
 	EVENTS
 	PARTIAL
@@ -49,6 +50,7 @@ const (
 	ST
 	TO
 	RESULTS
+	keyword_end
 )
 
 var tokens = [...]string{
@@ -82,6 +84,10 @@ var tokens = [...]string{
 	TO:           "TO",
 	RESULTS:      "RESULTS",
 }
+
+// IsKeyword returns true for tokens corresponding to keywords; it returns
+// false otherwise.
+func (t Type) IsKeyword() bool { return keyword_beg < t && t < keyword_end }
 
 // String returns the string corresponding to the token tok.
 func (t Type) String() string {
