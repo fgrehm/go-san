@@ -48,10 +48,13 @@ func Parse(src []byte) (*ast.File, error) {
 func (p *parser) Parse() (*ast.File, error) {
 	var err, scerr error
 	p.sc.Error = func(pos token.Pos, msg string) {
-		scerr = &PosError{Pos: pos, Err: errors.New(msg)}
+		scerr = p.err(pos, errors.New(msg))
 	}
 
 	file, err := p.file()
+	if scerr != nil {
+		return nil, scerr
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +78,7 @@ func (p *parser) file() (*ast.File, error) {
 				return nil, err
 			}
 		default:
-			return nil, fmt.Errorf("Unexpected token found: %s", tok.String())
+			return nil, p.err(tok.Pos, fmt.Errorf("Unexpected token found: %q", tok.Text))
 		}
 	}
 }
@@ -99,7 +102,7 @@ func (p *parser) parseIdentifiers(identifiersToken token.Token) (*ast.Identifier
 			break
 		}
 		if tok.Type != token.IDENTIFIER {
-			return nil, fmt.Errorf("Unexpected token found: %s. Expected an identifier", tok.String())
+			return nil, p.err(tok.Pos, fmt.Errorf("Unexpected token found: %q. Expected an identifier", tok.Text))
 		}
 
 		assignmentTrace := trace(p, "ParseIdentifier")
@@ -107,7 +110,7 @@ func (p *parser) parseIdentifiers(identifiersToken token.Token) (*ast.Identifier
 
 		tok = p.scan()
 		if tok.Type != token.ASSIGN {
-			return nil, fmt.Errorf("Unexpected token found: %s. Expected an =", tok.String())
+			return nil, p.err(tok.Pos, fmt.Errorf("Unexpected token found: %q. Expected an =", tok.Text))
 		}
 
 		assignment.Expression, err = p.scanExpression()
@@ -127,11 +130,11 @@ func (p *parser) scanExpression() (*ast.Expression, error) {
 	for {
 		tok := p.scan()
 		if tok.Type == token.EOF {
-			return nil, fmt.Errorf("Expected to find a semicolon at %s", tok.Pos)
+			return nil, p.err(tok.Pos, fmt.Errorf("Unexpected token found: %q. Expected a ;", tok.Text))
 		}
 		if tok.Type == token.SEMICOLON {
 			if len(exp.Tokens) == 0 {
-				return nil, fmt.Errorf("Expected to find an expresssion at %s", tok.Pos)
+				return nil, p.err(tok.Pos, fmt.Errorf("Invalid expression"))
 			}
 			break
 		}
@@ -234,6 +237,10 @@ func (p *parser) unscan() {
 
 // ----------------------------------------------------------------------------
 // Parsing support
+
+func (p *parser) err(pos token.Pos, err error) *PosError {
+	return &PosError{Pos: pos, Err: err}
+}
 
 func (p *parser) printTrace(a ...interface{}) {
 	if !p.enableTrace {
