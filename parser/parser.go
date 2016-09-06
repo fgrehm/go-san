@@ -9,7 +9,7 @@ import (
 	token "github.com/fgrehm/go-san/token"
 )
 
-type Parser struct {
+type parser struct {
 	sc *scanner.Scanner
 
 	// Last read token
@@ -24,8 +24,15 @@ type Parser struct {
 	n           int // buffer size (max = 1)
 }
 
-func newParser(src []byte) *Parser {
-	return &Parser{
+// Parser defines a syntatic parser for SAN models
+type Parser interface {
+	// Parse parses a SAN model into an abstract syntax tree
+	Parse() (*ast.File, error)
+}
+
+// New returns a new parser for the provided source
+func New(src []byte) Parser {
+	return &parser{
 		sc: scanner.New(src),
 		// enableTrace: true,
 	}
@@ -33,14 +40,12 @@ func newParser(src []byte) *Parser {
 
 // Parse returns the fully parsed source and returns the abstract syntax tree.
 func Parse(src []byte) (*ast.File, error) {
-	p := newParser(src)
+	p := New(src)
 	return p.Parse()
 }
 
-var errEofToken = errors.New("EOF token found")
-
 // Parse returns the fully parsed source and returns the abstract syntax tree.
-func (p *Parser) Parse() (*ast.File, error) {
+func (p *parser) Parse() (*ast.File, error) {
 	var err, scerr error
 	p.sc.Error = func(pos token.Pos, msg string) {
 		scerr = &PosError{Pos: pos, Err: errors.New(msg)}
@@ -53,7 +58,7 @@ func (p *Parser) Parse() (*ast.File, error) {
 	return file, nil
 }
 
-func (p *Parser) file() (*ast.File, error) {
+func (p *parser) file() (*ast.File, error) {
 	var err error
 	file := &ast.File{}
 
@@ -75,7 +80,7 @@ func (p *Parser) file() (*ast.File, error) {
 	}
 }
 
-func (p *Parser) parseIdentifiers(identifiersToken token.Token) (*ast.IdentifiersDefinition, error) {
+func (p *parser) parseIdentifiers(identifiersToken token.Token) (*ast.IdentifiersDefinition, error) {
 	defer un(trace(p, "ParseIdentifiersDefinition"))
 
 	var err error
@@ -117,7 +122,7 @@ func (p *Parser) parseIdentifiers(identifiersToken token.Token) (*ast.Identifier
 	return idDef, nil
 }
 
-func (p *Parser) scanExpression() (*ast.Expression, error) {
+func (p *parser) scanExpression() (*ast.Expression, error) {
 	exp := &ast.Expression{[]token.Token{}}
 	for {
 		tok := p.scan()
@@ -142,7 +147,7 @@ func (p *Parser) scanExpression() (*ast.Expression, error) {
 // scan returns the next token from the underlying scanner. If a token has
 // been unscanned then read that instead. In the process, it collects any
 // comment groups encountered, and remembers the last lead and line comments.
-func (p *Parser) scan() token.Token {
+func (p *parser) scan() token.Token {
 	// If we have a token on the buffer, then return it.
 	if p.n != 0 {
 		p.n = 0
@@ -187,7 +192,7 @@ func (p *Parser) scan() token.Token {
 	return p.tok
 }
 
-func (p *Parser) consumeComment() (comment *ast.Comment, endline int) {
+func (p *parser) consumeComment() (comment *ast.Comment, endline int) {
 	endline = p.tok.Pos.Line
 
 	// count the endline if it's multiline comment, ie starting with /*
@@ -205,7 +210,7 @@ func (p *Parser) consumeComment() (comment *ast.Comment, endline int) {
 	return
 }
 
-func (p *Parser) consumeCommentGroup(n int) (comments *ast.CommentGroup, endline int) {
+func (p *parser) consumeCommentGroup(n int) (comments *ast.CommentGroup, endline int) {
 	var list []*ast.Comment
 	endline = p.tok.Pos.Line
 
@@ -223,14 +228,14 @@ func (p *Parser) consumeCommentGroup(n int) (comments *ast.CommentGroup, endline
 }
 
 // unscan pushes the previously read token back onto the buffer.
-func (p *Parser) unscan() {
+func (p *parser) unscan() {
 	p.n = 1
 }
 
 // ----------------------------------------------------------------------------
 // Parsing support
 
-func (p *Parser) printTrace(a ...interface{}) {
+func (p *parser) printTrace(a ...interface{}) {
 	if !p.enableTrace {
 		return
 	}
@@ -249,14 +254,14 @@ func (p *Parser) printTrace(a ...interface{}) {
 	fmt.Println(a...)
 }
 
-func trace(p *Parser, msg string) *Parser {
+func trace(p *parser, msg string) *parser {
 	p.printTrace(msg, "(")
 	p.indent++
 	return p
 }
 
 // Usage pattern: defer un(trace(p, "..."))
-func un(p *Parser) {
+func un(p *parser) {
 	p.indent--
 	p.printTrace(")")
 }

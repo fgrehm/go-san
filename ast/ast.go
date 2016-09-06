@@ -25,26 +25,31 @@ type IdentifierAssignment struct {
 	Expression *Expression // the value to be assigned to the identifier
 }
 
+// Expression represents an expression used on the identifiers or results
+// definitions
 type Expression struct {
 	Tokens []token.Token
 }
 
+// Value returns the properly typed value for this expression. The type of
+// the returned interface{} is guaranteed based on the tokens found.
 func (e *Expression) Value() interface{} {
 	if len(e.Tokens) == 1 && e.Tokens[0].Type.IsLiteral() {
 		return e.Tokens[0].Value()
-	} else {
-		return e.Text()
 	}
+	return e.Text()
 }
 
+// Type returns the type of an expression, being a constant if a single litral
+// is present or an expression if multiple tokens make up for the expression
 func (e *Expression) Type() string {
 	if len(e.Tokens) == 1 && e.Tokens[0].Type.IsLiteral() {
 		return "constant"
-	} else {
-		return "expression"
 	}
+	return "expression"
 }
 
+// Text returns the list of tokens separated by spaces
 func (e *Expression) Text() string {
 	text := []string{}
 	for _, t := range e.Tokens {
@@ -57,10 +62,6 @@ func (e *Expression) Text() string {
 type Comment struct {
 	Start token.Pos // position of / or #
 	Text  string
-}
-
-func (c *Comment) Pos() token.Pos {
-	return c.Start
 }
 
 // CommentGroup node represents a sequence of comments with no other tokens and

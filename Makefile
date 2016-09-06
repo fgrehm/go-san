@@ -8,8 +8,14 @@ watch:
 .PHONY: watch.run
 watch.run:
 	clear
-	@$(MAKE) test
+	@make test
+	@make lint
 
 .PHONY: test
 test:
 	go test ./...
+
+# go get -u github.com/golang/lint/golint
+.PHONY: lint
+lint:
+	golint ./...

@@ -16,43 +16,68 @@ type Token struct {
 type Type int
 
 const (
-	// Special tokens
+	// ILLEGAL represents an invalid token
 	ILLEGAL Type = iota
+	// EOF represents the end of the file
 	EOF
+	// COMMENT represents a comment block
 	COMMENT
+	// SEMICOLON represents a semicolon
 	SEMICOLON
 
-	literal_beg
-	IDENTIFIER // literals
-	NUMBER     // 12345
-	FLOAT      // 123.45
-	literal_end
+	// literals
+	literalBeg
+	// IDENTIFIER represents an identifier
+	IDENTIFIER
+	// NUMBER represents an integer number
+	NUMBER
+	// FLOAT represents a float number
+	FLOAT
+	literalEnd
 
-	LPAREN // (
-	RPAREN // )
-	ASSIGN // =
-	// TODO: Support +
-	// TODO: Support -
-	MULT // *
-	// TODO: Support /
-	AND   // &&
-	EQUAL // ==
+	// LPAREN represents a left parenthesis
+	LPAREN
+	// RPAREN represents a right parenthesis
+	RPAREN
+	// ASSIGN represents an equal sign used on assignments
+	ASSIGN
+	// MULT represents a multiplication
+	MULT
+	// AND represents the && operator
+	AND
+	// EQUAL represents the == operator
+	EQUAL
 
-	keyword_beg
+	// TODO: Support +, - and /
+
+	keywordBeg
+	// IDENTIFIERS represents the identifiers keyword
 	IDENTIFIERS
+	// EVENTS represents the events keyword
 	EVENTS
+	// PARTIAL represents the partial keyword
 	PARTIAL
+	// REACHABILITY represents the reachability keyword
 	REACHABILITY
+	// NETWORK represents the network keyword
 	NETWORK
+	// CONTINUOUS represents the continuous keyword
 	CONTINUOUS
+	// LOC represents the loc keyword
 	LOC
+	// SYN represents the syn keyword
 	SYN
+	// AUT represents the aut keyword
 	AUT
+	// STT represents the stt keyword
 	STT
+	// ST represents the st keyword
 	ST
+	// TO represents the to keyword
 	TO
+	// RESULTS represents the results keyword
 	RESULTS
-	keyword_end
+	keywordEnd
 )
 
 var tokens = [...]string{
@@ -89,11 +114,11 @@ var tokens = [...]string{
 
 // IsLiteral returns true for tokens corresponding to basic type literals; it
 // returns false otherwise.
-func (t Type) IsLiteral() bool { return literal_beg < t && t < literal_end }
+func (t Type) IsLiteral() bool { return literalBeg < t && t < literalEnd }
 
 // IsKeyword returns true for tokens corresponding to keywords; it returns
 // false otherwise.
-func (t Type) IsKeyword() bool { return keyword_beg < t && t < keyword_end }
+func (t Type) IsKeyword() bool { return keywordBeg < t && t < keywordEnd }
 
 // String returns the string corresponding to the token tok.
 func (t Type) String() string {
