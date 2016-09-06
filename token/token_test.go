@@ -1,6 +1,7 @@
 package santoken
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -129,6 +130,23 @@ func TestLiterals(t *testing.T) {
 	for _, token := range tokens {
 		if token.tt.IsLiteral() != token.literal {
 			t.Errorf("want: %v got: %v for %s\n", token.literal, token.tt.IsLiteral(), token.tt.String())
+		}
+	}
+}
+
+func TestTokenValue(t *testing.T) {
+	var tokens = []struct {
+		tt Token
+		v  interface{}
+	}{
+		{Token{Type: FLOAT, Text: `3.14`}, float64(3.14)},
+		{Token{Type: NUMBER, Text: `42`}, int64(42)},
+		{Token{Type: IDENTIFIER, Text: `foo`}, "foo"},
+	}
+
+	for _, token := range tokens {
+		if val := token.tt.Value(); !reflect.DeepEqual(val, token.v) {
+			t.Errorf("want: %v got:%v\n", token.v, val)
 		}
 	}
 }

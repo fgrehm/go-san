@@ -111,3 +111,31 @@ func (t Type) String() string {
 func (t Token) String() string {
 	return fmt.Sprintf("%s %s %s", t.Pos.String(), t.Type.String(), t.Text)
 }
+
+// Value returns the properly typed value for this token. The type of
+// the returned interface{} is guaranteed based on the Type field.
+//
+// This can only be called for literal types. If it is called for any other
+// type, this will panic.
+func (t Token) Value() interface{} {
+	switch t.Type {
+	case FLOAT:
+		v, err := strconv.ParseFloat(t.Text, 64)
+		if err != nil {
+			panic(err)
+		}
+
+		return float64(v)
+	case NUMBER:
+		v, err := strconv.ParseInt(t.Text, 0, 64)
+		if err != nil {
+			panic(err)
+		}
+
+		return int64(v)
+	case IDENTIFIER:
+		return t.Text
+	default:
+		panic(fmt.Sprintf("unimplemented Value for type: %s", t.Type))
+	}
+}
