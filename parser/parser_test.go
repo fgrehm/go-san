@@ -93,6 +93,96 @@ func TestParseIdentifiersDefinition_Error(t *testing.T) {
 }
 
 // ----------------------------------------------------------------------------
+// Events block
+
+type parsedEvent struct {
+	line   int
+	column int
+	evType string
+	name   string
+	rate   string
+}
+type parsedEventsDefinition struct {
+	line   int
+	events []parsedEvent
+}
+
+func TestParseEventsDefinition(t *testing.T) {
+	var models = []struct {
+		src      string
+		expected parsedEventsDefinition
+	}{
+		{
+			"events\nloc foo (bar);\n syn john (doe);",
+			parsedEventsDefinition{
+				line: 1,
+				events: []parsedEvent{
+					{line: 2, column: 1, evType: "loc", name: "foo", rate: "bar"},
+					{line: 3, column: 2, evType: "syn", name: "john", rate: "doe"},
+				},
+			},
+		},
+		{
+			"/* */events\n // loc bla; \nloc foo (bar); loc l_req (r_req); syn john (doe);",
+			parsedEventsDefinition{
+				line: 1,
+				events: []parsedEvent{
+					{line: 3, column: 1, evType: "loc", name: "foo", rate: "bar"},
+					{line: 3, column: 16, evType: "loc", name: "l_req", rate: "r_req"},
+					{line: 3, column: 35, evType: "syn", name: "john", rate: "doe"},
+				},
+			},
+		},
+	}
+
+	for _, m := range models {
+		file, err := Parse([]byte(m.src))
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+
+		parsed := parsedEventsDefinition{
+			line:   file.Events.Token.Pos.Line,
+			events: []parsedEvent{},
+		}
+		for _, eventDescription := range file.Events.Descriptions {
+			parsed.events = append(parsed.events, parsedEvent{
+				line:   eventDescription.Type.Pos.Line,
+				column: eventDescription.Type.Pos.Column,
+				name:   eventDescription.Name.Text,
+				evType: eventDescription.Type.Text,
+				rate:   eventDescription.Rate.Text,
+			})
+		}
+
+		equals(t, m.expected, parsed)
+	}
+}
+
+func TestParseEventsDefinition_Error(t *testing.T) {
+	var models = []string{
+		"events f1",
+		"events f1;",
+		"events loc ",
+		"events loc ;",
+		"events loc foo ;",
+		"events loc foo ();",
+		"events syn ",
+		"events syn ;",
+		"events syn foo ;",
+		"events syn foo ();",
+	}
+
+	for _, m := range models {
+		_, err := Parse([]byte(m))
+		if err == nil {
+			t.Errorf("Expected to error with %q but did not", m)
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
 // Invalid models
 
 func TestErrorsWhenUnexpectedTokenFoundAtRoot(t *testing.T) {
