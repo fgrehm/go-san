@@ -18,7 +18,7 @@ type Identifier struct {
 }
 
 // Identifiers represent a collection of identifiers present on the `identifiers` block
-type Identifiers []Identifier
+type Identifiers []*Identifier
 
 // Event represents a single event that has been parsed from the `events` block
 type Event struct {
@@ -28,7 +28,7 @@ type Event struct {
 }
 
 // Events represent a collection of events present on the `events` block
-type Events []Event
+type Events []*Event
 
 // Reachability represents the reachability information about the model network
 type Reachability struct {
@@ -50,10 +50,10 @@ type Automaton struct {
 }
 
 // Transitions represent a collection of automaton transitions
-type Transitions []Transition
+type Transitions []*Transition
 
 // Automata represents a collection of automatons
-type Automata []Automaton
+type Automata []*Automaton
 
 // Transition represents a single automaton transition
 type Transition struct {
@@ -69,7 +69,7 @@ type Result struct {
 }
 
 // Results represents a collection of results present on the `results` block
-type Results []Result
+type Results []*Result
 
 // New instantiates a new model struct
 func New() *Model {
@@ -84,10 +84,27 @@ func New() *Model {
 	}
 }
 
-func (m *Model) AddIdentifier(i Identifier) {
+// AddIdentifier adds an Identifier to the model
+func (m *Model) AddIdentifier(i *Identifier) {
 	m.Identifiers = append(m.Identifiers, i)
 }
 
-func (m *Model) AddEvent(e Event) {
+// AddEvent adds an Event to the model
+func (m *Model) AddEvent(e *Event) {
 	m.Events = append(m.Events, e)
+}
+
+// AddResult adds a Result to the model
+func (m *Model) AddResult(r *Result) {
+	m.Results = append(m.Results, r)
+}
+
+// AddAutomaton adds an Automaton to a network
+func (n *Network) AddAutomaton(a *Automaton) {
+	n.Automata = append(n.Automata, a)
+}
+
+// AddTransition adds a Transition to the automaton
+func (a *Automaton) AddTransition(t *Transition) {
+	a.Transitions = append(a.Transitions, t)
 }

@@ -42,7 +42,7 @@ func translateAstToModel(file *ast.File) *model.Model {
 
 func translateIdentifiers(m *model.Model, f *ast.File) {
 	for _, assignment := range f.Identifiers.Assignments {
-		m.AddIdentifier(model.Identifier{
+		m.AddIdentifier(&model.Identifier{
 			Name:  assignment.Identifier.Text,
 			Type:  assignment.Expression.Type(),
 			Value: assignment.Expression.Value(),
@@ -57,7 +57,7 @@ func translateEvents(m *model.Model, f *ast.File) {
 			eventType = "synchronizing"
 		}
 
-		m.AddEvent(model.Event{
+		m.AddEvent(&model.Event{
 			Name: event.Name.Text,
 			Type: eventType,
 			Rate: event.Rate.Text,
@@ -80,14 +80,14 @@ func translateNetwork(m *model.Model, f *ast.File) {
 }
 
 func translateAutomaton(n *model.Network, a *ast.AutomatonDescription) {
-	aut := model.Automaton{
+	aut := &model.Automaton{
 		Name:        a.Name.Text,
 		Transitions: model.Transitions{},
 	}
 	for _, transition := range a.Transitions {
-		translateTransition(&aut, transition)
+		translateTransition(aut, transition)
 	}
-	n.Automata = append(n.Automata, aut)
+	n.AddAutomaton(aut)
 }
 
 func translateTransition(a *model.Automaton, t *ast.AutomatonTransition) {
@@ -95,17 +95,16 @@ func translateTransition(a *model.Automaton, t *ast.AutomatonTransition) {
 	for _, e := range t.Events {
 		events = append(events, e.Text)
 	}
-	transition := model.Transition{
+	a.AddTransition(&model.Transition{
 		From:   t.From.Text,
 		To:     t.To.Text,
 		Events: events,
-	}
-	a.Transitions = append(a.Transitions, transition)
+	})
 }
 
 func translateResults(m *model.Model, f *ast.File) {
 	for _, desc := range f.Results.Descriptions {
-		m.Results = append(m.Results, model.Result{
+		m.AddResult(&model.Result{
 			Label:      desc.Label.Text,
 			Expression: desc.Expression.Text(),
 		})
