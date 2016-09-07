@@ -134,6 +134,49 @@ func TestLiterals(t *testing.T) {
 	}
 }
 
+func TestEventTypes(t *testing.T) {
+	var tokens = []struct {
+		tt        Type
+		eventType bool
+	}{
+		{ILLEGAL, false},
+		{EOF, false},
+		{COMMENT, false},
+		{SEMICOLON, false},
+
+		{IDENTIFIER, false},
+		{NUMBER, false},
+		{FLOAT, false},
+
+		{LPAREN, false},
+		{RPAREN, false},
+		{ASSIGN, false},
+		{MULT, false},
+		{AND, false},
+		{EQUAL, false},
+
+		{IDENTIFIERS, false},
+		{EVENTS, false},
+		{PARTIAL, false},
+		{REACHABILITY, false},
+		{NETWORK, false},
+		{CONTINUOUS, false},
+		{LOC, true},
+		{SYN, true},
+		{AUT, false},
+		{STT, false},
+		{ST, false},
+		{TO, false},
+		{RESULTS, false},
+	}
+
+	for _, token := range tokens {
+		if token.tt.IsEventType() != token.eventType {
+			t.Errorf("want: %v got: %v for %s\n", token.eventType, token.tt.IsLiteral(), token.tt.String())
+		}
+	}
+}
+
 func TestTokenValue(t *testing.T) {
 	var tokens = []struct {
 		tt Token

@@ -63,10 +63,12 @@ const (
 	NETWORK
 	// CONTINUOUS represents the continuous keyword
 	CONTINUOUS
+	eventTypeBeg
 	// LOC represents the loc keyword
 	LOC
 	// SYN represents the syn keyword
 	SYN
+	eventTypeEnd
 	// AUT represents the aut keyword
 	AUT
 	// STT represents the stt keyword
@@ -115,6 +117,10 @@ var tokens = [...]string{
 // IsLiteral returns true for tokens corresponding to basic type literals; it
 // returns false otherwise.
 func (t Type) IsLiteral() bool { return literalBeg < t && t < literalEnd }
+
+// IsEventType returns true for tokens corresponding to event types (currently
+// loc or syn)
+func (t Type) IsEventType() bool { return eventTypeBeg < t && t < eventTypeEnd }
 
 // IsKeyword returns true for tokens corresponding to keywords; it returns
 // false otherwise.
