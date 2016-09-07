@@ -10,6 +10,7 @@ type File struct {
 	Events       *EventsDefinition
 	Reachability *ReachabilityDefinition
 	Results      *ResultsDefinition
+	Network      *NetworkDefinition
 }
 
 // Comment node represents a single //, # style or /*- style commment

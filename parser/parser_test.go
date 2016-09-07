@@ -97,16 +97,17 @@ func TestParseIdentifiersDefinition_Error(t *testing.T) {
 // ----------------------------------------------------------------------------
 // Events block
 
+type parsedEventsDefinition struct {
+	line   int
+	events []parsedEvent
+}
+
 type parsedEvent struct {
 	line   int
 	column int
 	evType string
 	name   string
 	rate   string
-}
-type parsedEventsDefinition struct {
-	line   int
-	events []parsedEvent
 }
 
 func TestParseEventsDefinition(t *testing.T) {
@@ -228,6 +229,114 @@ func TestParseReachabilityInfo_Error(t *testing.T) {
 		"reachability ;",
 		"reachability = ;",
 		"reachability events ;",
+	}
+
+	for _, m := range models {
+		_, err := Parse([]byte(m))
+		if err == nil {
+			t.Errorf("Expected to error with %q but did not", m)
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
+// Network block
+
+type parsedNetworkDefinition struct {
+	line     int
+	name     string
+	netType  string
+	automata []parsedAutomaton
+}
+
+type parsedAutomaton struct {
+	line        int
+	column      int
+	name        string
+	transitions []parsedAutomatonTransition
+}
+
+type parsedAutomatonTransition struct {
+	from   string
+	to     string
+	events []string
+}
+
+func TestParseNetworkDefinition(t *testing.T) {
+	src := `network ClientServer (continuous)
+aut Client
+  stt A to (B) s_1
+  stt B to (C) s_2
+  stt C to (B) s_3
+        to (A) s_4 s_5
+aut Server stt D to (e) s_6`
+	expected := parsedNetworkDefinition{
+		line:    1,
+		name:    "ClientServer",
+		netType: "continuous",
+		automata: []parsedAutomaton{
+			{
+				line:   2,
+				column: 1,
+				name:   "Client",
+				transitions: []parsedAutomatonTransition{
+					{from: "A", to: "B", events: []string{"s_1"}},
+					{from: "B", to: "C", events: []string{"s_2"}},
+					{from: "C", to: "B", events: []string{"s_3"}},
+					{from: "C", to: "A", events: []string{"s_4", "s_5"}},
+				},
+			},
+			{
+				line:   7,
+				column: 1,
+				name:   "Server",
+				transitions: []parsedAutomatonTransition{
+					{from: "D", to: "e", events: []string{"s_6"}},
+				},
+			},
+		},
+	}
+
+	file, err := Parse([]byte(src))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	parsed := parsedNetworkDefinition{
+		line:     file.Network.Token.Pos.Line,
+		name:     file.Network.Name.Text,
+		netType:  file.Network.Type.Text,
+		automata: []parsedAutomaton{},
+	}
+	for _, automatonDescription := range file.Network.Automata {
+		automaton := parsedAutomaton{
+			line:        automatonDescription.Token.Pos.Line,
+			column:      automatonDescription.Token.Pos.Column,
+			name:        automatonDescription.Name.Text,
+			transitions: []parsedAutomatonTransition{},
+		}
+		for _, automatonTransition := range automatonDescription.Transitions {
+			events := []string{}
+			for _, event := range automatonTransition.Events {
+				events = append(events, event.Text)
+			}
+			automaton.transitions = append(automaton.transitions, parsedAutomatonTransition{
+				from:   automatonTransition.From.Text,
+				to:     automatonTransition.To.Text,
+				events: events,
+			})
+		}
+		parsed.automata = append(parsed.automata, automaton)
+	}
+	equals(t, expected, parsed)
+}
+
+func TestParseNetworkDefinition_Error(t *testing.T) {
+	var models = []string{
+		"network",
+		"network Foo",
+		"network Foo\naut",
+		"network Foo (continous) aut",
 	}
 
 	for _, m := range models {

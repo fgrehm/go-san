@@ -31,6 +31,7 @@ var parserMap = map[token.Type]blockParserFunc{
 	token.EVENTS:       parseEvents,
 	token.PARTIAL:      parseReachability,
 	token.REACHABILITY: parseReachability,
+	token.NETWORK:      parseNetwork,
 	token.RESULTS:      parseResults,
 }
 
