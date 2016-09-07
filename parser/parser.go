@@ -24,7 +24,8 @@ type parser struct {
 	n           int // buffer size (max = 1)
 }
 
-type blockParserFunc func (f *ast.File, p *parser, firstToken token.Token) error
+type blockParserFunc func(f *ast.File, p *parser, firstToken token.Token) error
+
 var parserMap = map[token.Type]blockParserFunc{
 	token.IDENTIFIERS: parseIdentifiers,
 }

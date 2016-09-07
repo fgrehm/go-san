@@ -38,4 +38,3 @@ func (e *Expression) Text() string {
 	}
 	return strings.Join(text, " ")
 }
-

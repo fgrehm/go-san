@@ -17,4 +17,3 @@ type IdentifierAssignment struct {
 	Identifier token.Token // the identifier name itself
 	Expression *Expression // the value to be assigned to the identifier
 }
-
