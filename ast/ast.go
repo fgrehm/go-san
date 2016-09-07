@@ -6,8 +6,9 @@ import (
 
 // File represents a single SAN file
 type File struct {
-	Identifiers *IdentifiersDefinition
-	Events      *EventsDefinition
+	Identifiers  *IdentifiersDefinition
+	Events       *EventsDefinition
+	Reachability *ReachabilityDefinition
 }
 
 // Comment node represents a single //, # style or /*- style commment

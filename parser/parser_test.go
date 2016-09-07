@@ -6,6 +6,8 @@ import (
 	"reflect"
 	"runtime"
 	"testing"
+
+	token "github.com/fgrehm/go-san/token"
 )
 
 // ----------------------------------------------------------------------------
@@ -172,6 +174,60 @@ func TestParseEventsDefinition_Error(t *testing.T) {
 		"events syn ;",
 		"events syn foo ;",
 		"events syn foo ();",
+	}
+
+	for _, m := range models {
+		_, err := Parse([]byte(m))
+		if err == nil {
+			t.Errorf("Expected to error with %q but did not", m)
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
+// Reachability block
+
+func TestParseReachabilityInfo(t *testing.T) {
+	var testData = []struct {
+		src             string
+		expectedPartial bool
+		expectedExp     interface{}
+	}{
+		{
+			"partial reachability = ((st Client == Idle) && (st Server == Idle));",
+			true, "( ( st Client == Idle ) && ( st Server == Idle ) )",
+		},
+		{
+			"reachability = (( st Client == Idle) && (st Server == Idle));",
+			false, "( ( st Client == Idle ) && ( st Server == Idle ) )",
+		},
+		{
+			"reachability = 1;",
+			false, int64(1),
+		},
+	}
+
+	for _, a := range testData {
+		file, err := Parse(([]byte(a.src)))
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		info := file.Reachability
+
+		equals(t, a.expectedPartial, info.Tokens[0].Type == token.PARTIAL)
+		equals(t, a.expectedExp, info.Expression.Value())
+	}
+}
+
+func TestParseReachabilityInfo_Error(t *testing.T) {
+	var models = []string{
+		"partial ;",
+		"partial reachability;",
+		"partial reachability = ;",
+		"reachability ;",
+		"reachability = ;",
+		"reachability events ;",
 	}
 
 	for _, m := range models {

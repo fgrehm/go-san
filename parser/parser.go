@@ -27,8 +27,10 @@ type parser struct {
 type blockParserFunc func(f *ast.File, p *parser, firstToken token.Token) error
 
 var parserMap = map[token.Type]blockParserFunc{
-	token.IDENTIFIERS: parseIdentifiers,
-	token.EVENTS:      parseEvents,
+	token.IDENTIFIERS:  parseIdentifiers,
+	token.EVENTS:       parseEvents,
+	token.PARTIAL:      parseReachability,
+	token.REACHABILITY: parseReachability,
 }
 
 // Parser defines a syntatic parser for SAN models
