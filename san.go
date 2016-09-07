@@ -41,6 +41,10 @@ func translateAstToModel(file *ast.File) *model.Model {
 }
 
 func translateIdentifiers(m *model.Model, f *ast.File) {
+	if f.Identifiers == nil {
+		return
+	}
+
 	for _, assignment := range f.Identifiers.Assignments {
 		m.AddIdentifier(&model.Identifier{
 			Name:  assignment.Identifier.Text,
@@ -51,6 +55,10 @@ func translateIdentifiers(m *model.Model, f *ast.File) {
 }
 
 func translateEvents(m *model.Model, f *ast.File) {
+	if f.Events == nil {
+		return
+	}
+
 	for _, event := range f.Events.Descriptions {
 		eventType := "local"
 		if event.Type.Type == token.SYN {
@@ -66,11 +74,19 @@ func translateEvents(m *model.Model, f *ast.File) {
 }
 
 func translateReachabilityInfo(m *model.Model, f *ast.File) {
+	if f.Reachability == nil {
+		return
+	}
+
 	m.Reachability.Partial = f.Reachability.Tokens[0].Type == token.PARTIAL
 	m.Reachability.Expression = f.Reachability.Expression.Text()
 }
 
 func translateNetwork(m *model.Model, f *ast.File) {
+	if f.Network == nil {
+		return
+	}
+
 	m.Network.Name = f.Network.Name.Text
 	m.Network.Type = f.Network.Type.Text
 
@@ -103,6 +119,10 @@ func translateTransition(a *model.Automaton, t *ast.AutomatonTransition) {
 }
 
 func translateResults(m *model.Model, f *ast.File) {
+	if f.Results == nil {
+		return
+	}
+
 	for _, desc := range f.Results.Descriptions {
 		m.AddResult(&model.Result{
 			Label:      desc.Label.Text,
