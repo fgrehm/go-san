@@ -24,6 +24,11 @@ type parser struct {
 	n           int // buffer size (max = 1)
 }
 
+type blockParserFunc func (f *ast.File, p *parser, firstToken token.Token) error
+var parserMap = map[token.Type]blockParserFunc{
+	token.IDENTIFIERS: parseIdentifiers,
+}
+
 // Parser defines a syntatic parser for SAN models
 type Parser interface {
 	// Parse parses a SAN model into an abstract syntax tree
@@ -62,67 +67,23 @@ func (p *parser) Parse() (*ast.File, error) {
 }
 
 func (p *parser) file() (*ast.File, error) {
-	var err error
 	file := &ast.File{}
 
 	defer un(trace(p, "ParseFile"))
 
 	for {
 		tok := p.scan()
-		switch tok.Type {
-		case token.EOF:
+		if tok.Type == token.EOF {
 			return file, nil
-		case token.IDENTIFIERS:
-			file.Identifiers, err = p.parseIdentifiers(tok)
-			if err != nil {
+		}
+		if blockParser, ok := parserMap[tok.Type]; ok {
+			if err := blockParser(file, p, tok); err != nil {
 				return nil, err
 			}
-		default:
-			return nil, p.err(tok.Pos, fmt.Errorf("Unexpected token found: %q", tok.Text))
+		} else {
+			return nil, p.err(tok.Pos, errors.New(""))
 		}
 	}
-}
-
-func (p *parser) parseIdentifiers(identifiersToken token.Token) (*ast.IdentifiersDefinition, error) {
-	defer un(trace(p, "ParseIdentifiersDefinition"))
-
-	var err error
-	idDef := &ast.IdentifiersDefinition{
-		Token:       identifiersToken,
-		Assignments: []*ast.IdentifierAssignment{},
-	}
-
-	for {
-		tok := p.scan()
-		if tok.Type == token.EOF {
-			break
-		}
-		if tok.Type.IsKeyword() {
-			p.unscan()
-			break
-		}
-		if tok.Type != token.IDENTIFIER {
-			return nil, p.err(tok.Pos, fmt.Errorf("Unexpected token found: %q. Expected an identifier", tok.Text))
-		}
-
-		assignmentTrace := trace(p, "ParseIdentifier")
-		assignment := &ast.IdentifierAssignment{Identifier: tok}
-
-		tok = p.scan()
-		if tok.Type != token.ASSIGN {
-			return nil, p.err(tok.Pos, fmt.Errorf("Unexpected token found: %q. Expected an =", tok.Text))
-		}
-
-		assignment.Expression, err = p.scanExpression()
-		if err != nil {
-			return nil, err
-		}
-		un(assignmentTrace)
-
-		idDef.Assignments = append(idDef.Assignments, assignment)
-	}
-
-	return idDef, nil
 }
 
 func (p *parser) scanExpression() (*ast.Expression, error) {

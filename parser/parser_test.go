@@ -54,6 +54,7 @@ func TestParseIdentifiersDefinition(t *testing.T) {
 		file, err := Parse([]byte(m.src))
 		if err != nil {
 			t.Error(err)
+			continue
 		}
 
 		parsed := parsedIdentifiersDefinition{
@@ -70,7 +71,7 @@ func TestParseIdentifiersDefinition(t *testing.T) {
 			})
 		}
 
-		equals(t, m.expected.assignments, parsed.assignments)
+		equals(t, m.expected, parsed)
 	}
 }
 
