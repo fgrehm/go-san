@@ -239,7 +239,90 @@ func TestParseReachabilityInfo_Error(t *testing.T) {
 }
 
 // ----------------------------------------------------------------------------
-// Invalid models
+// Results block
+
+type parsedResultsDefinition struct {
+	line         int
+	column       int
+	descriptions []parsedResult
+}
+
+type parsedResult struct {
+	line       int
+	column     int
+	label      string
+	expression string
+}
+
+func TestParseResultsDefinition(t *testing.T) {
+	var models = []struct {
+		src      string
+		expected parsedResultsDefinition
+	}{
+		{
+			"results\nA_b = (st Foo == bar)\n && (st bla == foo); a = st Bla == state;",
+			parsedResultsDefinition{
+				line: 1,
+				descriptions: []parsedResult{
+					{line: 2, column: 1, label: "A_b", expression: "( st Foo == bar ) && ( st bla == foo )"},
+					{line: 3, column: 22, label: "a", expression: "st Bla == state"},
+				},
+			},
+		},
+		{
+			"results//A_b = (st Foo == bar)\n //&& (st bla == foo);\n a = st Bla == state\n;",
+			parsedResultsDefinition{
+				line: 1,
+				descriptions: []parsedResult{
+					{line: 3, column: 2, label: "a", expression: "st Bla == state"},
+				},
+			},
+		},
+	}
+
+	for _, m := range models {
+		file, err := Parse([]byte(m.src))
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+
+		parsed := parsedResultsDefinition{
+			line:         file.Results.Token.Pos.Line,
+			descriptions: []parsedResult{},
+		}
+		for _, resultDescription := range file.Results.Descriptions {
+			parsed.descriptions = append(parsed.descriptions, parsedResult{
+				line:       resultDescription.Label.Pos.Line,
+				column:     resultDescription.Label.Pos.Column,
+				label:      resultDescription.Label.Text,
+				expression: resultDescription.Expression.Text(),
+			})
+		}
+
+		equals(t, m.expected, parsed)
+	}
+}
+
+func TestParseResultsDefinition_Error(t *testing.T) {
+	var models = []string{
+		"results",
+		"results ;",
+		"results a ;",
+		"results a = ;",
+		"results a = (st a & 2;",
+	}
+
+	for _, m := range models {
+		_, err := Parse([]byte(m))
+		if err == nil {
+			t.Errorf("Expected to error with %q but did not", m)
+		}
+	}
+}
+
+// ----------------------------------------------------------------------------
+// Bad models
 
 func TestErrorsWhenUnexpectedTokenFoundAtRoot(t *testing.T) {
 	_, err := Parse([]byte("ident\n"))

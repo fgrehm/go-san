@@ -31,6 +31,7 @@ var parserMap = map[token.Type]blockParserFunc{
 	token.EVENTS:       parseEvents,
 	token.PARTIAL:      parseReachability,
 	token.REACHABILITY: parseReachability,
+	token.RESULTS:      parseResults,
 }
 
 // Parser defines a syntatic parser for SAN models
@@ -85,7 +86,7 @@ func (p *parser) file() (*ast.File, error) {
 				return nil, err
 			}
 		} else {
-			return nil, p.err(tok.Pos, errors.New(""))
+			return nil, p.err(tok.Pos, fmt.Errorf("Unexpected token %q found", tok.Text))
 		}
 	}
 }

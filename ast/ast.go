@@ -9,6 +9,7 @@ type File struct {
 	Identifiers  *IdentifiersDefinition
 	Events       *EventsDefinition
 	Reachability *ReachabilityDefinition
+	Results      *ResultsDefinition
 }
 
 // Comment node represents a single //, # style or /*- style commment
