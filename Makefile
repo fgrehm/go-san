@@ -1,4 +1,4 @@
-default: test
+default: test lint
 
 # go get github.com/cespare/reflex
 .PHONY: watch
@@ -8,8 +8,7 @@ watch:
 .PHONY: watch.run
 watch.run:
 	clear
-	@make test
-	@make lint
+	@make test lint
 
 .PHONY: test
 test:
@@ -18,4 +17,4 @@ test:
 # go get -u github.com/golang/lint/golint
 .PHONY: lint
 lint:
-	golint ./...
+	golint -set_exit_status ./...
