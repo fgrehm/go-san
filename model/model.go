@@ -1,5 +1,10 @@
 package sanmodel
 
+import (
+	"bytes"
+	"encoding/gob"
+)
+
 // Model represents a model that has been parsed from a .san file
 type Model struct {
 	Identifiers  Identifiers   `json:"identifiers"`
@@ -82,6 +87,21 @@ func New() *Model {
 		},
 		Results: Results{},
 	}
+}
+
+// Copy copies over a model to another variable so that it can be manipulated
+// without side effects
+func (m *Model) Copy(dest *Model) error {
+	var mod bytes.Buffer
+	enc := gob.NewEncoder(&mod)
+	dec := gob.NewDecoder(&mod)
+
+	err := enc.Encode(m)
+	if err != nil {
+		return err
+	}
+
+	return dec.Decode(&dest)
 }
 
 // AddIdentifier adds an Identifier to the model
