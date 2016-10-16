@@ -41,14 +41,21 @@ const (
 	RPAREN
 	// ASSIGN represents an equal sign used on assignments
 	ASSIGN
+	// SUM represents a sum
+	SUM
+	// SUB represents a subtraction
+	SUB
 	// MULT represents a multiplication
 	MULT
+	// DIV represents a division
+	DIV
+
 	// AND represents the && operator
 	AND
 	// EQUAL represents the == operator
 	EQUAL
-
-	// TODO: Support +, - and /
+	// NEQUAL represents the != operator
+	NEQUAL
 
 	keywordBeg
 	// IDENTIFIERS represents the identifiers keyword
@@ -95,9 +102,13 @@ var tokens = [...]string{
 	LPAREN: "LPAREN",
 	RPAREN: "RPAREN",
 	ASSIGN: "ASSIGN",
+	SUM:    "SUM",
+	SUB:    "SUB",
 	MULT:   "MULT",
+	DIV:    "DIV",
 	AND:    "AND",
 	EQUAL:  "EQUAL",
+	NEQUAL: "NEQUAL",
 
 	IDENTIFIERS:  "IDENTIFIERS",
 	EVENTS:       "EVENTS",

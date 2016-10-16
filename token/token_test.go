@@ -23,8 +23,12 @@ func TestTypeString(t *testing.T) {
 		{RPAREN, "RPAREN"},
 		{ASSIGN, "ASSIGN"},
 		{MULT, "MULT"},
+		{DIV, "DIV"},
+		{SUM, "SUM"},
+		{SUB, "SUB"},
 		{AND, "AND"},
 		{EQUAL, "EQUAL"},
+		{NEQUAL, "NEQUAL"},
 
 		{IDENTIFIERS, "IDENTIFIERS"},
 		{EVENTS, "EVENTS"},
@@ -68,6 +72,7 @@ func TestKeywords(t *testing.T) {
 		{MULT, false},
 		{AND, false},
 		{EQUAL, false},
+		{NEQUAL, false},
 
 		{IDENTIFIERS, true},
 		{EVENTS, true},
@@ -111,6 +116,7 @@ func TestLiterals(t *testing.T) {
 		{MULT, false},
 		{AND, false},
 		{EQUAL, false},
+		{NEQUAL, false},
 
 		{IDENTIFIERS, false},
 		{EVENTS, false},
@@ -154,6 +160,7 @@ func TestEventTypes(t *testing.T) {
 		{MULT, false},
 		{AND, false},
 		{EQUAL, false},
+		{NEQUAL, false},
 
 		{IDENTIFIERS, false},
 		{EVENTS, false},

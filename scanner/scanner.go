@@ -159,19 +159,33 @@ func (s *Scanner) Scan() token.Token {
 		case eof:
 			tok = token.EOF
 		case '/':
-			tok = token.COMMENT
-			s.scanComment(ch)
+			next := s.peek()
+			if next == '*' || next == '/' {
+				tok = token.COMMENT
+				s.scanComment(ch)
+			} else {
+				tok = token.DIV
+			}
 		case '(':
 			tok = token.LPAREN
 		case ')':
 			tok = token.RPAREN
 		case ';':
 			tok = token.SEMICOLON
+		case '+':
+			tok = token.SUM
 		case '=':
 			tok = token.ASSIGN
 			if s.peek() == '=' {
 				s.next()
 				tok = token.EQUAL
+			}
+		case '!':
+			if s.peek() == '=' {
+				s.next()
+				tok = token.NEQUAL
+			} else {
+				s.err("illegal char " + string(ch))
 			}
 		case '&':
 			if s.peek() == '&' {

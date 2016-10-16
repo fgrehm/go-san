@@ -39,8 +39,12 @@ var tokenLists = map[string][]tokenPair{
 		{token.LPAREN, "("},
 		{token.RPAREN, ")"},
 		{token.ASSIGN, "="},
-		{token.EQUAL, "=="},
+		{token.SUM, "+"},
+		{token.MULT, "*"},
+		{token.DIV, "/"},
 		{token.AND, "&&"},
+		{token.EQUAL, "=="},
+		{token.NEQUAL, "!="},
 	},
 	"ident": []tokenPair{
 		{token.IDENTIFIER, "a"},
@@ -322,6 +326,7 @@ func TestRealExample(t *testing.T) {
 identifiers
   r_proc    = 6;
   F1 = (st Client == Working) * 1;
+	F2 = r_proc / 2;
 
 events
   loc l_proc    (r_proc);
@@ -360,6 +365,12 @@ results
 		{token.RPAREN, `)`},
 		{token.MULT, `*`},
 		{token.NUMBER, `1`},
+		{token.SEMICOLON, `;`},
+		{token.IDENTIFIER, `F2`},
+		{token.ASSIGN, `=`},
+		{token.IDENTIFIER, `r_proc`},
+		{token.DIV, `/`},
+		{token.NUMBER, `2`},
 		{token.SEMICOLON, `;`},
 
 		{token.EVENTS, `events`},
@@ -469,7 +480,7 @@ func TestError(t *testing.T) {
 	testError(t, "abc\xff", "1:4", "illegal UTF-8 encoding", token.IDENTIFIER)
 
 	testError(t, `&`, "1:1", "illegal char &", token.ILLEGAL)
-	testError(t, `-`, "1:1", "illegal char -", token.ILLEGAL)
+	testError(t, `!`, "1:1", "illegal char !", token.ILLEGAL)
 
 	testError(t, `01238`, "1:6", "illegal octal number", token.NUMBER)
 	testError(t, `01238123`, "1:9", "illegal octal number", token.NUMBER)
