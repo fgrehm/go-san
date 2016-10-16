@@ -267,8 +267,8 @@ func TestParseNetworkDefinition(t *testing.T) {
 aut Client
   stt A to (B) s_1
   stt B to (C) s_2
-  stt C to (B) s_3
-        to (A) s_4 s_5
+  stt C to (B) s_3(p_1)
+        to (A) s_4(p_2) s_5(p_3)
 aut Server stt D to (e) s_6`
 	expected := parsedNetworkDefinition{
 		line:    1,
@@ -280,10 +280,10 @@ aut Server stt D to (e) s_6`
 				column: 1,
 				name:   "Client",
 				transitions: []parsedAutomatonTransition{
-					{from: "A", to: "B", events: []string{"s_1"}},
-					{from: "B", to: "C", events: []string{"s_2"}},
-					{from: "C", to: "B", events: []string{"s_3"}},
-					{from: "C", to: "A", events: []string{"s_4", "s_5"}},
+					{from: "A", to: "B", events: []string{"s_1|"}},
+					{from: "B", to: "C", events: []string{"s_2|"}},
+					{from: "C", to: "B", events: []string{"s_3|p_1"}},
+					{from: "C", to: "A", events: []string{"s_4|p_2", "s_5|p_3"}},
 				},
 			},
 			{
@@ -291,7 +291,7 @@ aut Server stt D to (e) s_6`
 				column: 1,
 				name:   "Server",
 				transitions: []parsedAutomatonTransition{
-					{from: "D", to: "e", events: []string{"s_6"}},
+					{from: "D", to: "e", events: []string{"s_6|"}},
 				},
 			},
 		},
@@ -318,7 +318,7 @@ aut Server stt D to (e) s_6`
 		for _, automatonTransition := range automatonDescription.Transitions {
 			events := []string{}
 			for _, event := range automatonTransition.Events {
-				events = append(events, event.Text)
+				events = append(events, fmt.Sprintf("%s|%s", event.EventName.Text, event.Probability.Text))
 			}
 			automaton.transitions = append(automaton.transitions, parsedAutomatonTransition{
 				from:   automatonTransition.From.Text,

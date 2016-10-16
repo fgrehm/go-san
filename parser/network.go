@@ -109,15 +109,13 @@ func parseAutomatonTransitions(p *parser, sttToken token.Token) ([]*ast.Automato
 			break
 		}
 
-		transition := &ast.AutomatonTransition{
-			From:   from,
-			Events: []token.Token{},
-		}
+		transition := &ast.AutomatonTransition{From: from}
 
 		tok = p.scan()
 		if tok.Type != token.LPAREN {
 			return nil, fmt.Errorf("Unexpected token found: %s. Expected a (", tok.String())
 		}
+
 		tok = p.scan()
 		if tok.Type != token.IDENTIFIER {
 			return nil, fmt.Errorf("Unexpected token found: %s. Expected an identifier", tok.String())
@@ -129,22 +127,48 @@ func parseAutomatonTransitions(p *parser, sttToken token.Token) ([]*ast.Automato
 			return nil, fmt.Errorf("Unexpected token found: %s. Expected a )", tok.String())
 		}
 
-		tok = p.scan()
-		if tok.Type != token.IDENTIFIER {
-			return nil, fmt.Errorf("Unexpected token found: %s. Expected an identifier", tok.String())
+		events, err := parseAutomatonTransitionEvents(p)
+		if err != nil {
+			return nil, err
 		}
-		transition.Events = append(transition.Events, tok)
-		for {
-			tok = p.scan()
-			if tok.Type != token.IDENTIFIER {
-				p.unscan()
-				break
-			}
-			transition.Events = append(transition.Events, tok)
+		if len(events) == 0 {
+			return nil, fmt.Errorf("No events found for transition %s", transition.From)
 		}
+		transition.Events = events
 
 		transitions = append(transitions, transition)
 	}
 
 	return transitions, nil
+}
+
+func parseAutomatonTransitionEvents(p *parser) ([]*ast.TransitionEventDescription, error) {
+	events := []*ast.TransitionEventDescription{}
+	for {
+		tok := p.scan()
+		if tok.Type != token.IDENTIFIER {
+			p.unscan()
+			break
+		}
+		e := &ast.TransitionEventDescription{EventName: tok}
+		events = append(events, e)
+
+		tok = p.scan()
+		if tok.Type != token.LPAREN {
+			p.unscan()
+			continue
+		}
+		tok = p.scan()
+		if tok.Type != token.IDENTIFIER {
+			return nil, fmt.Errorf("Unexpected token found: %s. Expected an identifier", tok.String())
+		}
+		e.Probability = tok
+
+		tok = p.scan()
+		if tok.Type != token.RPAREN {
+			return nil, fmt.Errorf("Unexpected token found: %s. Expected a )", tok.String())
+		}
+	}
+
+	return events, nil
 }

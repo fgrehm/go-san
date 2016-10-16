@@ -26,5 +26,12 @@ type AutomatonDescription struct {
 type AutomatonTransition struct {
 	From   token.Token
 	To     token.Token
-	Events []token.Token
+	Events []*TransitionEventDescription
+}
+
+// TransitionEventDescription represents a single automaton transition event
+// present on the automaton block inside the network block
+type TransitionEventDescription struct {
+	EventName   token.Token
+	Probability token.Token
 }

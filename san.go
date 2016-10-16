@@ -107,9 +107,12 @@ func translateAutomaton(n *model.Network, a *ast.AutomatonDescription) {
 }
 
 func translateTransition(a *model.Automaton, t *ast.AutomatonTransition) {
-	events := []string{}
+	events := model.TransitionEvents{}
 	for _, e := range t.Events {
-		events = append(events, e.Text)
+		events = append(events, &model.TransitionEvent{
+			EventName:   e.EventName.Text,
+			Probability: e.Probability.Text,
+		})
 	}
 	a.AddTransition(&model.Transition{
 		From:   t.From.Text,

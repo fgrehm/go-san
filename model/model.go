@@ -62,10 +62,19 @@ type Automata []*Automaton
 
 // Transition represents a single automaton transition
 type Transition struct {
-	From   string   `json:"from"`
-	To     string   `json:"to"`
-	Events []string `json:"events"`
+	From   string           `json:"from"`
+	To     string           `json:"to"`
+	Events TransitionEvents `json:"events"`
 }
+
+// TransitionEvent represents a single automaton transition event
+type TransitionEvent struct {
+	EventName   string `json:"name"`
+	Probability string `json:"probability"`
+}
+
+// TransitionEvents represents a collection of transition events
+type TransitionEvents []*TransitionEvent
 
 // Result represents a single result present on the `results` block
 type Result struct {
