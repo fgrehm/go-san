@@ -54,6 +54,8 @@ const (
 	AND
 	// EQUAL represents the == operator
 	EQUAL
+	// NEG represents the ! operator
+	NEG
 	// NEQUAL represents the != operator
 	NEQUAL
 
@@ -108,6 +110,7 @@ var tokens = [...]string{
 	DIV:    "DIV",
 	AND:    "AND",
 	EQUAL:  "EQUAL",
+	NEG:    "NEG",
 	NEQUAL: "NEQUAL",
 
 	IDENTIFIERS:  "IDENTIFIERS",

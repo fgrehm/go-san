@@ -45,6 +45,7 @@ var tokenLists = map[string][]tokenPair{
 		{token.AND, "&&"},
 		{token.EQUAL, "=="},
 		{token.NEQUAL, "!="},
+		{token.NEG, "!"},
 	},
 	"ident": []tokenPair{
 		{token.IDENTIFIER, "a"},
@@ -322,10 +323,10 @@ identifiers
 }
 
 func TestRealExample(t *testing.T) {
-	complexSAN := `// This is based on the basic client server example
+	complexSAN := `// This is some random comment
 identifiers
   r_proc    = 6;
-  F1 = (st Client == Working) * 1;
+  F1 = !(st Client == Working) * 1;
 	F2 = r_proc / 2;
 
 events
@@ -349,7 +350,7 @@ results
 		tokenType token.Type
 		literal   string
 	}{
-		{token.COMMENT, `// This is based on the basic client server example`},
+		{token.COMMENT, `// This is some random comment`},
 		{token.IDENTIFIERS, `identifiers`},
 		{token.IDENTIFIER, `r_proc`},
 		{token.ASSIGN, `=`},
@@ -357,6 +358,7 @@ results
 		{token.SEMICOLON, `;`},
 		{token.IDENTIFIER, `F1`},
 		{token.ASSIGN, `=`},
+		{token.NEG, `!`},
 		{token.LPAREN, `(`},
 		{token.ST, `st`},
 		{token.IDENTIFIER, `Client`},
@@ -480,7 +482,6 @@ func TestError(t *testing.T) {
 	testError(t, "abc\xff", "1:4", "illegal UTF-8 encoding", token.IDENTIFIER)
 
 	testError(t, `&`, "1:1", "illegal char &", token.ILLEGAL)
-	testError(t, `!`, "1:1", "illegal char !", token.ILLEGAL)
 
 	testError(t, `01238`, "1:6", "illegal octal number", token.NUMBER)
 	testError(t, `01238123`, "1:9", "illegal octal number", token.NUMBER)

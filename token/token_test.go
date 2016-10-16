@@ -28,6 +28,7 @@ func TestTypeString(t *testing.T) {
 		{SUB, "SUB"},
 		{AND, "AND"},
 		{EQUAL, "EQUAL"},
+		{NEG, "NEG"},
 		{NEQUAL, "NEQUAL"},
 
 		{IDENTIFIERS, "IDENTIFIERS"},
@@ -72,6 +73,7 @@ func TestKeywords(t *testing.T) {
 		{MULT, false},
 		{AND, false},
 		{EQUAL, false},
+		{NEG, false},
 		{NEQUAL, false},
 
 		{IDENTIFIERS, true},
@@ -116,6 +118,7 @@ func TestLiterals(t *testing.T) {
 		{MULT, false},
 		{AND, false},
 		{EQUAL, false},
+		{NEG, false},
 		{NEQUAL, false},
 
 		{IDENTIFIERS, false},
@@ -160,6 +163,7 @@ func TestEventTypes(t *testing.T) {
 		{MULT, false},
 		{AND, false},
 		{EQUAL, false},
+		{NEG, false},
 		{NEQUAL, false},
 
 		{IDENTIFIERS, false},

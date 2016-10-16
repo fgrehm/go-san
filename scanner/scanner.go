@@ -185,7 +185,7 @@ func (s *Scanner) Scan() token.Token {
 				s.next()
 				tok = token.NEQUAL
 			} else {
-				s.err("illegal char " + string(ch))
+				tok = token.NEG
 			}
 		case '&':
 			if s.peek() == '&' {
