@@ -15,3 +15,12 @@ func Parse(src []byte) (*model.Model, error) {
 	}
 	return translateAstToModel(file), nil
 }
+
+// Compile generates a textual san model based on a sanmodel.Model
+func Compile(m *model.Model) []byte {
+	buf := &bytes.Buffer{}
+	for _, f := range formatters {
+		f(m, buf)
+	}
+	return buf.Bytes()
+}
