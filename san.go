@@ -17,10 +17,13 @@ func Parse(src []byte) (*model.Model, error) {
 }
 
 // Compile generates a textual san model based on a sanmodel.Model
-func Compile(m *model.Model) []byte {
+func Compile(m *model.Model) ([]byte, error) {
 	buf := &bytes.Buffer{}
 	for _, f := range formatters {
-		f(m, buf)
+		err := f(m, buf)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return buf.Bytes()
+	return buf.Bytes(), nil
 }

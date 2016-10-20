@@ -9,7 +9,7 @@ import (
 	model "github.com/fgrehm/go-san/model"
 )
 
-type formatter func(*model.Model, *bytes.Buffer)
+type formatter func(*model.Model, *bytes.Buffer) error
 
 var formatters = []formatter{
 	formatIdentifiers,
@@ -19,22 +19,26 @@ var formatters = []formatter{
 	formatResults,
 }
 
-func formatIdentifiers(m *model.Model, buf *bytes.Buffer) {
+func formatIdentifiers(m *model.Model, buf *bytes.Buffer) error {
 	buf.WriteString("identifiers\n")
 	for _, ident := range m.Identifiers {
 		if ident.Type == "expression" {
 			buf.WriteString(fmt.Sprintf("  %s = %s;\n", ident.Name, ident.Value))
 		} else {
-			if val, ok := ident.Value.(float64); ok {
+			switch val := ident.Value.(type) {
+			case float32, float64:
 				buf.WriteString(fmt.Sprintf("  %s = %f;\n", ident.Name, val))
-			} else if val, ok := ident.Value.(int64); ok {
+			case int, int64:
 				buf.WriteString(fmt.Sprintf("  %s = %d;\n", ident.Name, val))
+			default:
+				return fmt.Errorf("Unknown identifier type found %t", val)
 			}
 		}
 	}
+	return nil
 }
 
-func formatEvents(m *model.Model, buf *bytes.Buffer) {
+func formatEvents(m *model.Model, buf *bytes.Buffer) error {
 	buf.WriteString("events\n")
 	for _, event := range m.Events {
 		if event.Type == "local" {
@@ -43,17 +47,19 @@ func formatEvents(m *model.Model, buf *bytes.Buffer) {
 			buf.WriteString(fmt.Sprintf("  syn %s (%s);\n", event.Name, event.Rate))
 		}
 	}
+	return nil
 }
 
-func formatReachability(m *model.Model, buf *bytes.Buffer) {
+func formatReachability(m *model.Model, buf *bytes.Buffer) error {
 	reachability := m.Reachability
 	if reachability.Partial {
 		buf.WriteString("partial ")
 	}
 	buf.WriteString(fmt.Sprintf("reachability = %s;\n", reachability.Expression))
+	return nil
 }
 
-func formatNetwork(m *model.Model, buf *bytes.Buffer) {
+func formatNetwork(m *model.Model, buf *bytes.Buffer) error {
 	network := m.Network
 
 	buf.WriteString(fmt.Sprintf("network %s (%s)\n", network.Name, network.Type))
@@ -78,6 +84,7 @@ func formatNetwork(m *model.Model, buf *bytes.Buffer) {
 			}
 		}
 	}
+	return nil
 }
 
 func extractStates(t model.Transitions) []string {
@@ -95,9 +102,10 @@ func extractStates(t model.Transitions) []string {
 	return states
 }
 
-func formatResults(m *model.Model, buf *bytes.Buffer) {
+func formatResults(m *model.Model, buf *bytes.Buffer) error {
 	buf.WriteString("results\n")
 	for _, res := range m.Results {
 		buf.WriteString(fmt.Sprintf("  %s = %s;\n", res.Label, res.Expression))
 	}
+	return nil
 }
