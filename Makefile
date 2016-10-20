@@ -3,6 +3,7 @@ default: test lint
 # go get github.com/cespare/reflex
 .PHONY: watch
 watch:
+	@make watch.run || true
 	reflex -r '\.go$$' -- make watch.run
 
 .PHONY: watch.run
